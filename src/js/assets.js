@@ -1,5 +1,8 @@
 // **MEDIA**//
 import "../assets/Logo.svg";
+import "../assets/cover.jpg";
+import "../assets/edit-regular.svg";
+import "../assets/trash-alt-regular.svg";
 
 // **Style**//
 import "../scss/style.scss";

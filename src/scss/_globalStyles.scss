@@ -8,3 +8,24 @@ body {
   width: 100vw;
   height: 100vh;
 }
+
+.bookList_cnt {
+  #bookListTable {
+    img {
+      width: 20%;
+    }
+    .iCons_cnt {
+      display: flex;
+      justify-content: space-around;
+      .icon_Cnt {
+        display: block;
+        width: 40px;
+        height: 40px;
+        img {
+          width: 100%;
+
+        }
+      }
+    }
+  }
+}
