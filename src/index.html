@@ -31,33 +31,35 @@
       <section class="form_cnt">
         <form>
           <div class="form-group">
-            <label for="exampleInputEmail1">Book Title</label>
+            <label for="titleInput">Book Title</label>
             <input
               type="text"
               class="form-control"
-              id="exampleInputEmail1"
-              aria-describedby="emailHelp"
+              id="titleInput"
               placeholder="Title"
+              name="title"
             />
           </div>
           <div class="form-group">
-            <label for="exampleInputPassword1">Book Author</label>
+            <label for="authorInput">Book Author</label>
             <input
               type="text"
               class="form-control"
-              id="exampleInputPassword1"
+              id="authorInput"
               placeholder="Author"
+              name="author"
             />
           </div>
           <div class="form-group">
-            <label for="exampleFormControlSelect1">Category</label>
-            <select class="form-control" id="exampleFormControlSelect1">
-              <option>Crime</option>
-              <option>Sci-Fi</option>
-              <option>Fantasy</option>
-              <option>Poetry</option>
-              <option>Drama</option>
-              <option>Science</option>
+            <label for="categoryOptionSelect">Category</label>
+            <select class="form-control" id="categoryOptionSelect">
+              <option selected>Choose...</option>
+              <option value="crime">Crime</option>
+              <option value="sci-fi">Sci-Fi</option>
+              <option value="fantasy">Fantasy</option>
+              <option value="poetry">Poetry</option>
+              <option value="drama">Drama</option>
+              <option value="science">Science</option>
             </select>
           </div>
           <div class="form-group">
@@ -67,9 +69,9 @@
                 <input
                   class="form-check-input"
                   type="radio"
-                  name="inlineRadioOptions"
+                  name="priority"
                   id="inlineRadio1"
-                  value="option1"
+                  value="1"
                 />
                 <label class="form-check-label" for="inlineRadio1">1</label>
               </div>
@@ -77,9 +79,9 @@
                 <input
                   class="form-check-input"
                   type="radio"
-                  name="inlineRadioOptions"
+                  name="priority"
                   id="inlineRadio2"
-                  value="option2"
+                  value="2"
                 />
                 <label class="form-check-label" for="inlineRadio2">2</label>
               </div>
@@ -87,9 +89,9 @@
                 <input
                   class="form-check-input"
                   type="radio"
-                  name="inlineRadioOptions"
+                  name="priority"
                   id="inlineRadio3"
-                  value="option3"
+                  value="3"
                 />
                 <label class="form-check-label" for="inlineRadio3">3</label>
               </div>
@@ -97,9 +99,9 @@
                 <input
                   class="form-check-input"
                   type="radio"
-                  name="inlineRadioOptions"
+                  name="priority"
                   id="inlineRadio4"
-                  value="option4"
+                  value="4"
                 />
                 <label class="form-check-label" for="inlineRadio4">4</label>
               </div>
@@ -107,16 +109,16 @@
                 <input
                   class="form-check-input"
                   type="radio"
-                  name="inlineRadioOptions"
+                  name="priority"
                   id="inlineRadio5"
-                  value="option5"
+                  value="5"
                 />
                 <label class="form-check-label" for="inlineRadio5">5</label>
               </div>
             </div>
           </div>
-          <button type="submit" class="btn btn-danger">Clear</button>
-          <button type="submit" class="btn btn-success">Add</button>
+          <button type="button" class="btn btn-danger btn-clear">Clear</button>
+          <button type="button" class="btn btn-success btn-add">Add</button>
         </form>
       </section>
       <!-- Add Book Form End -->
@@ -194,21 +196,6 @@
                     </span>
                   </div>
                 </td>
-              </tr>
-              <tr>
-                <td>Fight Club</td>
-                <td>Chuck Phalaniuk</td>
-                <th scope="row">Drama</th>
-                <td>3</td>
-                <td><img src="./assets/cover.jpg" alt="book cover" /></td>
-                <td>5</td>
-              </tr>
-              <tr>
-                <td>Fight Club</td>
-                <td>Chuck Phalaniuk</td>
-                <th scope="row">Drama</th>
-                <td>3</td>
-                <td><img src="./assets/cover.jpg" alt="book cover" /></td>
               </tr>
             </tbody>
           </table>
