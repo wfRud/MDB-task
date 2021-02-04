@@ -1,4 +1,4 @@
-import Book from "./_book";
+import Book from "./Book";
 
 export default class BookUI {
   constructor(arr) {
@@ -116,7 +116,6 @@ export default class BookUI {
       } else {
         item[id] = index;
       }
-      console.log(item);
     });
   }
 }

@@ -1,5 +1,5 @@
-import Form from "./_form";
-import BookUI from "./_bookUI";
+import Form from "./form";
+import BookUI from "./_BookUI";
 
 export default class App {
   constructor() {

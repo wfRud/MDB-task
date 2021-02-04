@@ -8,7 +8,7 @@ import "../assets/trash-alt-regular.svg";
 import "../scss/style.scss";
 
 //**Animation**//
-import "../js/_customAnimation.js";
+import "../js/customAnimation.js";
 
 // **Start App**//
 import App from "./app";
