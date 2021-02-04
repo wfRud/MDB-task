@@ -2,7 +2,7 @@ import Book from "./Book";
 import Storage from "./_Storage";
 
 export default class BookUI {
-  constructor(arr) {
+  constructor(form, arr) {
     const _root = document.createElement("tr"),
       _editIcon = document.createElement("img"),
       _deleteIcon = document.createElement("img");
@@ -12,7 +12,7 @@ export default class BookUI {
     this.getEditIcon = () => _editIcon;
     this.getDeleteIcon = () => _deleteIcon;
 
-    this.editBook();
+    this.editBook(form);
     this.deleteBook(arr);
   }
 
@@ -91,14 +91,16 @@ export default class BookUI {
       this.createBook(book);
       this.attachToCnt(cnt, this.getBookElement());
       Storage.setStorage("Books", arr);
+
       form.clearForm();
     }
   }
 
-  editBook() {
+  editBook(form) {
     this.getEditIcon().addEventListener("click", () => {
-      console.log("edit");
-      console.log(this);
+      //   console.log("edit");
+      console.log(form);
+      //   console.log(this);
     });
   }
 
@@ -106,11 +108,11 @@ export default class BookUI {
     this.getDeleteIcon().addEventListener("click", () => {
       arr.splice(this.getBookElementID(), 1);
       this.getBookElement().remove();
-
       const elemsCollection = document.querySelectorAll("[data-id]");
 
       this.resetID(arr, "id", false);
       this.resetID(elemsCollection, "data-id", true);
+
       Storage.setStorage("Books", arr);
     });
   }

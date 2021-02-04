@@ -8,11 +8,15 @@ export default class App {
     this.form = new Form();
     this.tBody = document.querySelector(".booksListCnt");
 
-    this.renderStorage(this.tBody, this.books);
+    this.renderStorage(this.tBody, Storage.getStorage("Books"));
 
     this.form.addButton.addEventListener("click", (e) => {
       e.preventDefault();
-      new BookUI(this.books).addBook(this.tBody, this.form, this.books);
+      new BookUI(this.form, this.books).addBook(
+        this.tBody,
+        this.form,
+        this.books
+      );
     });
 
     this.form.clearButton.addEventListener("click", (e) => {
@@ -22,6 +26,10 @@ export default class App {
   }
 
   renderStorage(cnt, arr) {
-    arr.forEach((item) => new BookUI(this.books).renderBooks(cnt, item));
+    if (arr) {
+      arr.forEach((item) =>
+        new BookUI(this.form, this.books).renderBooks(cnt, item)
+      );
+    }
   }
 }
