@@ -1,3 +1,5 @@
+import Storage from "./_Storage";
+
 export default class Form {
   constructor() {
     this.titleInput = document.getElementById("titleInput");
@@ -5,8 +7,13 @@ export default class Form {
     this.categoryInput = document.getElementById("categoryOptionSelect");
     this.priorityCheckBoxes = document.querySelectorAll(".form-check-input");
 
+    this.formInputs = document.querySelectorAll("[data-role]");
+
     this.addButton = document.querySelector(".btn-add");
     this.clearButton = document.querySelector(".btn-clear");
+
+    this.setInputsStorage(this.formInputs);
+    this.getInputsStorage(this.formInputs);
   }
 
   isNotEmpty(field) {
@@ -83,10 +90,34 @@ export default class Form {
     this.authorInput.value = "";
     this.categoryInput.selectedIndex = null;
 
-    // !! Add Clear Storage
+    for (const input of this.formInputs) {
+      Storage.removeStorage(input.name);
+    }
 
     for (let radio of this.priorityCheckBoxes) {
       radio.checked = false;
     }
+  }
+
+  setInputsStorage(inputs) {
+    inputs.forEach((input) => {
+      input.addEventListener("input", () => {
+        Storage.setStorage(input.name, input.value);
+      });
+    });
+  }
+
+  getInputsStorage(inputs) {
+    inputs.forEach((input) => {
+      const isStorage = Storage.getStorage(input.name);
+      if (isStorage && input.type === "radio") {
+        const id = Storage.getStorage(input.name);
+        document
+          .getElementById(`inlineRadio${id}`)
+          .setAttribute("checked", "checked");
+      } else if (input.type !== "radio") {
+        input.value = Storage.getStorage(input.name);
+      } else return;
+    });
   }
 }

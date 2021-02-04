@@ -1,4 +1,5 @@
 import Book from "./Book";
+import Storage from "./_Storage";
 
 export default class BookUI {
   constructor(arr) {
@@ -72,6 +73,11 @@ export default class BookUI {
     cover.appendChild(coverImg);
   }
 
+  renderBooks(cnt, book) {
+    this.createBook(book);
+    this.attachToCnt(cnt, this.getBookElement());
+  }
+
   addBook(cnt, form, arr) {
     if (form.isValid()) {
       const book = new Book(
@@ -84,6 +90,7 @@ export default class BookUI {
       arr.push(book);
       this.createBook(book);
       this.attachToCnt(cnt, this.getBookElement());
+      Storage.setStorage("Books", arr);
       form.clearForm();
     }
   }
@@ -104,6 +111,7 @@ export default class BookUI {
 
       this.resetID(arr, "id", false);
       this.resetID(elemsCollection, "data-id", true);
+      Storage.setStorage("Books", arr);
     });
   }
 
