@@ -10,7 +10,8 @@ export default class Form {
   }
 
   isNotEmpty(field) {
-    return field.value !== "";
+    const regex = /^[^\s].+[^\s]$/g;
+    return field.value !== "" && regex.test(field.value);
   }
 
   isChecked() {
