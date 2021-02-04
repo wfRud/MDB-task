@@ -10,7 +10,7 @@ export default class App {
 
     this.form.addButton.addEventListener("click", (e) => {
       e.preventDefault();
-      new BookUI().addBook(this.tBody, this.form, this.books);
+      new BookUI(this.books).addBook(this.tBody, this.form, this.books);
     });
 
     this.form.clearButton.addEventListener("click", (e) => {

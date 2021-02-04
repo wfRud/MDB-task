@@ -1,19 +1,21 @@
 import Book from "./_book";
 
 export default class BookUI {
-  constructor() {
+  constructor(arr) {
     const _root = document.createElement("tr"),
       _editIcon = document.createElement("img"),
       _deleteIcon = document.createElement("img");
 
     this.getBookElement = () => _root;
+    this.getBookElementID = () => this.getBookElement().getAttribute("data-id");
     this.getEditIcon = () => _editIcon;
     this.getDeleteIcon = () => _deleteIcon;
+
+    this.editBook();
+    this.deleteBook(arr);
   }
 
   attachToCnt(cnt, book) {
-    console.log(cnt);
-    console.log(book);
     cnt.appendChild(book);
   }
 
@@ -50,6 +52,9 @@ export default class BookUI {
     deleteIcon_cnt.className = "icon_Cnt";
     icons_cnt.className = "iCons_cnt";
 
+    // Set bookElement index
+    this.getBookElement().setAttribute("data-id", props.id);
+
     // Append elements
     this.getBookElement().appendChild(title);
     this.getBookElement().appendChild(author);
@@ -70,6 +75,7 @@ export default class BookUI {
   addBook(cnt, form, arr) {
     if (form.isValid()) {
       const book = new Book(
+        arr.length,
         form.titleInput.value,
         form.authorInput.value,
         form.categoryInput.value,
@@ -79,12 +85,38 @@ export default class BookUI {
       this.createBook(book);
       this.attachToCnt(cnt, this.getBookElement());
       form.clearForm();
-
-      console.log(arr);
     }
   }
 
-  editBook() {}
+  editBook() {
+    this.getEditIcon().addEventListener("click", () => {
+      console.log("edit");
+      console.log(this);
+    });
+  }
 
-  deleteBook() {}
+  deleteBook(arr) {
+    this.getDeleteIcon().addEventListener("click", () => {
+      arr.splice(this.getBookElementID(), 1);
+      this.getBookElement().remove();
+
+      const elemsCollection = document.querySelectorAll("[data-id]");
+
+      this.resetID(arr, "id", false);
+      this.resetID(elemsCollection, "data-id", true);
+    });
+  }
+
+  // That function reset ID of collection,
+  // get 3 parameters: [collection, nameId, isNodeElement]
+  resetID(collection, id, NodeElement) {
+    collection.forEach((item, index) => {
+      if (NodeElement) {
+        item.setAttribute(id, index);
+      } else {
+        item[id] = index;
+      }
+      console.log(item);
+    });
+  }
 }
