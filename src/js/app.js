@@ -1,15 +1,21 @@
 import Form from "./_form";
+import BookUI from "./_bookUI";
 
-const form = new Form();
+export default class App {
+  constructor() {
+    this.books = [];
 
-form.addButton.addEventListener("click", (e) => {
-  e.preventDefault();
-  if (form.isValid()) {
-    form.clearForm();
+    this.form = new Form();
+    this.tBody = document.querySelector(".booksListCnt");
+
+    this.form.addButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      new BookUI().addBook(this.tBody, this.form, this.books);
+    });
+
+    this.form.clearButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      this.form.clearForm();
+    });
   }
-});
-
-form.clearButton.addEventListener("click", (e) => {
-  e.preventDefault();
-  form.clearForm();
-});
+}

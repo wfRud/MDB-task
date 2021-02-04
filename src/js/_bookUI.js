@@ -1,5 +1,7 @@
+import Book from "./_book";
+
 export default class BookUI {
-  constructor(cnt, props) {
+  constructor() {
     const _root = document.createElement("tr"),
       _editIcon = document.createElement("img"),
       _deleteIcon = document.createElement("img");
@@ -7,14 +9,11 @@ export default class BookUI {
     this.getBookElement = () => _root;
     this.getEditIcon = () => _editIcon;
     this.getDeleteIcon = () => _deleteIcon;
-
-    this.createBook(props);
-
-    this.attachToCnt(cnt, this.getBookElement());
   }
 
   attachToCnt(cnt, book) {
     console.log(cnt);
+    console.log(book);
     cnt.appendChild(book);
   }
 
@@ -67,4 +66,25 @@ export default class BookUI {
     actions.appendChild(icons_cnt);
     cover.appendChild(coverImg);
   }
+
+  addBook(cnt, form, arr) {
+    if (form.isValid()) {
+      const book = new Book(
+        form.titleInput.value,
+        form.authorInput.value,
+        form.categoryInput.value,
+        form.isChecked().value
+      );
+      arr.push(book);
+      this.createBook(book);
+      this.attachToCnt(cnt, this.getBookElement());
+      form.clearForm();
+
+      console.log(arr);
+    }
+  }
+
+  editBook() {}
+
+  deleteBook() {}
 }
