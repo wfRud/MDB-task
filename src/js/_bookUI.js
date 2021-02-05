@@ -2,25 +2,20 @@ import Book from "./Book";
 import Storage from "./_Storage";
 
 export default class BookUI {
-  constructor(form, arr) {
+  constructor() {
     const _root = document.createElement("tr"),
-      _editIcon = document.createElement("img"),
-      _deleteIcon = document.createElement("img");
+      _deleteIcon = document.createElement("img"),
+      _editIcon = document.createElement("img");
 
     this.getBookElement = () => _root;
-    this.getBookElementID = () => this.getBookElement().getAttribute("data-id");
+    this.getBookElementID = () =>
+      Number(this.getBookElement().getAttribute("data-id"));
+
     this.getEditIcon = () => _editIcon;
     this.getDeleteIcon = () => _deleteIcon;
-
-    this.editBook(form);
-    this.deleteBook(arr);
   }
 
-  attachToCnt(cnt, book) {
-    cnt.appendChild(book);
-  }
-
-  createBook(props) {
+  createBook(cnt, props) {
     //  Create Elements
     const title = document.createElement("td"),
       author = document.createElement("td"),
@@ -40,6 +35,12 @@ export default class BookUI {
     category.textContent = props.category;
     priority.textContent = props.priority;
     //** coverImg.src = props.cover;
+
+    // Added Class
+    title.className = "title";
+    author.className = "author";
+    category.className = "category";
+    priority.className = "priority";
 
     // Set src & alt attr for icons
     this.getEditIcon().src = "./assets/edit-regular.svg";
@@ -71,11 +72,14 @@ export default class BookUI {
     icons_cnt.appendChild(deleteIcon_cnt);
     actions.appendChild(icons_cnt);
     cover.appendChild(coverImg);
+
+    cnt.appendChild(this.getBookElement());
   }
 
-  renderBooks(cnt, book) {
-    this.createBook(book);
-    this.attachToCnt(cnt, this.getBookElement());
+  renderBooks(cnt, item, arr, form) {
+    this.createBook(cnt, item);
+    this.deleteBook(arr);
+    this.editBook(arr, form);
   }
 
   addBook(cnt, form, arr) {
@@ -87,21 +91,81 @@ export default class BookUI {
         form.categoryInput.value,
         form.isChecked().value
       );
+
       arr.push(book);
-      this.createBook(book);
-      this.attachToCnt(cnt, this.getBookElement());
+
+      this.createBook(cnt, book);
+      this.deleteBook(arr);
+      this.editBook(arr, form);
       Storage.setStorage("Books", arr);
 
       form.clearForm();
     }
   }
 
-  editBook(form) {
+  editBook(arr, form) {
     this.getEditIcon().addEventListener("click", () => {
-      //   console.log("edit");
-      console.log(form);
-      //   console.log(this);
+      const editCard = arr.find((item) => item.id === this.getBookElementID());
+      const booksElems = document.querySelectorAll("[data-id]");
+
+      this.clearEditFlag(arr, false);
+      this.clearEditFlag(booksElems, true);
+      editCard.isEdit = true;
+      form.editFlag = true;
+      this.getBookElement().setAttribute("data-edit", "edit");
+      this.setEditFormDetails(arr, form);
     });
+  }
+
+  setEditFormDetails(arr, form) {
+    const { titleInput, authorInput, categoryInput } = form;
+    const currentBook = arr.find((item) => item.id === this.getBookElementID());
+
+    titleInput.value = currentBook.title;
+    authorInput.value = currentBook.author;
+    categoryInput.value = currentBook.category;
+
+    document.getElementById(
+      `inlineRadio${currentBook.priority}`
+    ).checked = true;
+
+    form.addButton.textContent = "Edit";
+    form.addButton.className = "btn btn-warning btn-add";
+  }
+
+  setEditBookContent(form, books) {
+    const editCardElement = document.querySelector("[data-edit]"),
+      titleElem = editCardElement.querySelector(".title"),
+      authorElem = editCardElement.querySelector(".author"),
+      categoryElem = editCardElement.querySelector(".category"),
+      priorityElem = editCardElement.querySelector(".priority");
+
+    const editCard = books.find((book) => book.isEdit);
+
+    editCard.title = form.titleInput.value;
+    editCard.author = form.authorInput.value;
+    editCard.category = form.categoryInput.value;
+    editCard.priority = form.isChecked().value;
+
+    titleElem.textContent = form.titleInput.value;
+    authorElem.textContent = form.authorInput.value;
+    categoryElem.textContent = form.categoryInput.value;
+    priorityElem.textContent = form.isChecked().value;
+
+    delete editCard.isEdit;
+    editCardElement.removeAttribute("data-edit");
+    Storage.setStorage("Books", books);
+  }
+
+  updateBook(form, books) {
+    if (form.isValid()) {
+      this.setEditBookContent(form, books);
+      form.clearForm();
+
+      form.addButton.textContent = "Add";
+      form.addButton.className = "btn btn-success btn-add";
+      delete form.editFlag;
+    }
   }
 
   deleteBook(arr) {
@@ -125,6 +189,16 @@ export default class BookUI {
         item.setAttribute(id, index);
       } else {
         item[id] = index;
+      }
+    });
+  }
+
+  clearEditFlag(arr, NodeElement) {
+    arr.forEach((item) => {
+      if (!NodeElement) {
+        delete item.isEdit;
+      } else {
+        item.removeAttribute("data-edit");
       }
     });
   }

@@ -99,6 +99,13 @@ export default class Form {
     }
   }
 
+  clearRadioButton() {
+    this.priorityCheckBoxes.forEach((item) => {
+      item.removeAttribute("checked");
+      console.log(item);
+    });
+  }
+
   setInputsStorage(inputs) {
     inputs.forEach((input) => {
       input.addEventListener("input", () => {
@@ -111,10 +118,8 @@ export default class Form {
     inputs.forEach((input) => {
       const isStorage = Storage.getStorage(input.name);
       if (isStorage && input.type === "radio") {
-        const id = Storage.getStorage(input.name);
-        document
-          .getElementById(`inlineRadio${id}`)
-          .setAttribute("checked", "checked");
+        const priority = Storage.getStorage(input.name);
+        document.getElementById(`inlineRadio${priority}`).checked = true;
       } else if (input.type !== "radio") {
         input.value = Storage.getStorage(input.name);
       } else return;
