@@ -10,6 +10,7 @@ export default class Form {
     this.formInputs = document.querySelectorAll("[data-role]");
 
     this.addButton = document.querySelector(".btn-add");
+    // this.addCategoryButton = document.querySelector(".btn-add-category");
     this.clearButton = document.querySelector(".btn-clear");
 
     this.setInputsStorage(this.formInputs);

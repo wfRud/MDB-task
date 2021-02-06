@@ -1,12 +1,19 @@
 import Book from "./Book";
-import Form from "./form";
+import Form from "./Form";
+import FormUI from "./FormUI";
 import BookUI from "./_BookUI";
 import Storage from "./_Storage";
 
 export default class App {
-  constructor() {
-    this.books = Storage.getStorage("Books") ? Storage.getStorage("Books") : [];
+  constructor(categories, priorityAmount) {
+    this.categories = categories;
+    this.priorityAmount = priorityAmount;
+
+    this.formUI = new FormUI(".form_cnt", this.categories, this.priorityAmount);
     this.form = new Form();
+
+    this.books = Storage.getStorage("Books") ? Storage.getStorage("Books") : [];
+
     this.tBody = document.querySelector(".booksListCnt");
 
     this.renderCards(this.tBody, this.books, this.form);
@@ -33,6 +40,11 @@ export default class App {
       this.form.addButton.className = "btn btn-success btn-add";
       delete this.form.editFlag;
     });
+
+    // this.form.addCategoryButton.addEventListener("click", (e) => {
+    //   e.preventDefault();
+    //   console.log("Add Category");
+    // });
   }
 
   renderCards(cnt, arr, form) {

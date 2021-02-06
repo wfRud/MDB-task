@@ -13,4 +13,4 @@ import "../js/customAnimation.js";
 // **Start App**//
 import App from "./app";
 
-new App();
+new App(["Crime", "Sci-Fi", "Fantasy", "Poetry", "Drama", "Science"], 5);
