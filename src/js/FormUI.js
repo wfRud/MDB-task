@@ -3,7 +3,6 @@ export default class FormUI {
     const root = this.createRoot(),
       _categories = categories,
       _priorityAmount = priorityAmount;
-
     this.createForm(root, _categories, _priorityAmount);
     this.attachToCnt(cnt, root);
 
@@ -102,36 +101,41 @@ export default class FormUI {
     const select = document.createElement("select"),
       option = document.createElement("option"),
       label = document.createElement("label"),
+      addCategoryInput = document.createElement("input"),
       formGroup = document.createElement("div");
 
     select.id = id;
-    select.className = "form-control";
+    select.className = "form-control active";
     select.name = name;
     select.dataset.role = "data-role";
     option.textContent = "Choose...";
     option.value = "";
 
+    addCategoryInput.type = "text";
+    addCategoryInput.id = "addCategory";
+    addCategoryInput.className = "form-control";
+    addCategoryInput.name = "addCategory";
+    addCategoryInput.placeholder = "Add category";
+    addCategoryInput.required = true;
+    addCategoryInput.dataset.role = "data-role";
+
     select.appendChild(option);
 
-    categories.forEach((category) => {
-      const option = document.createElement("option");
-      option.value = category;
-      option.textContent = category;
-      select.appendChild(option);
-    });
+    this.renderCategories(categories, select);
 
     label.htmlFor = id;
     label.textContent = labelText;
 
     formGroup.className = "form-group";
     formGroup.appendChild(label);
-    // formGroup.appendChild(
-    //   this.createBtn(
-    //     "button",
-    //     "btn btn-success btn-add-category",
-    //     "add category"
-    //   )
-    // );
+    formGroup.appendChild(
+      this.createBtn(
+        "button",
+        "btn btn-success btn-add-category",
+        "add category"
+      )
+    );
+    formGroup.appendChild(addCategoryInput);
     formGroup.appendChild(select);
 
     return formGroup;
@@ -184,5 +188,23 @@ export default class FormUI {
     btn.textContent = txtContent;
 
     return btn;
+  }
+
+  renderCategories(categories, rootElem) {
+    categories.forEach((category) => {
+      const option = document.createElement("option");
+      option.value = category;
+      option.textContent = category;
+      rootElem.appendChild(option);
+    });
+  }
+
+  clearCategories(categoriesCnt) {
+    const categoriesElems = categoriesCnt.querySelectorAll("option");
+
+    categoriesElems.forEach((categoryElem) => {
+      console.log(categoryElem);
+      categoryElem.value ? categoryElem.remove() : null;
+    });
   }
 }

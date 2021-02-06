@@ -6,8 +6,10 @@ import Storage from "./_Storage";
 
 export default class App {
   constructor(categories, priorityAmount) {
-    this.categories = categories;
+    this.categories = new Set(categories);
     this.priorityAmount = priorityAmount;
+
+    this.updateCategories(this.categories);
 
     this.formUI = new FormUI(".form_cnt", this.categories, this.priorityAmount);
     this.form = new Form();
@@ -41,15 +43,36 @@ export default class App {
       delete this.form.editFlag;
     });
 
-    // this.form.addCategoryButton.addEventListener("click", (e) => {
-    //   e.preventDefault();
-    //   console.log("Add Category");
-    // });
+    this.form.categoryOptionLabel.addEventListener("click", (e) => {
+      e.preventDefault();
+      this.form.addCategoryInput.classList.toggle("active");
+      this.form.categoryInput.classList.toggle("active");
+      this.form.addCategoryButton.classList.toggle("active");
+    });
+
+    this.form.addCategoryButton.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      if (this.form.addCategory(this.categories)) {
+        this.formUI.clearCategories(this.form.categorySelectCnt);
+        this.formUI.renderCategories(
+          this.categories,
+          this.form.categorySelectCnt
+        );
+      }
+    });
   }
 
   renderCards(cnt, arr, form) {
     arr.forEach((item) => {
       new BookUI().renderBooks(cnt, item, arr, form);
     });
+  }
+
+  updateCategories(categories) {
+    const storageCategories = Storage.getStorage("categories");
+    storageCategories
+      ? storageCategories.forEach((category) => categories.add(category))
+      : null;
   }
 }

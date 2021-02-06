@@ -9,6 +9,40 @@ body {
   height: 100vh;
 }
 
+form {
+  label[for="categoryOptionSelect"] {
+    transition: 0.3s;
+    &:hover {
+      cursor: pointer;
+      box-shadow: 0px 7px 3px -4px $bs_blue;
+      outline: 0;
+    }
+    &.focus {
+      outline: 0;
+    }
+  }
+  #addCategory {
+    display: none;
+    &.active {
+      display: block;
+    }
+  }
+
+  #categoryOptionSelect {
+    display: none;
+    &.active {
+      display: block;
+    }
+  }
+
+  .btn.btn-success.btn-add-category {
+    display: none;
+    &.active {
+      display: block;
+    }
+  }
+}
+
 .bookList_cnt {
   #bookListTable {
     img {
@@ -23,7 +57,6 @@ body {
         height: 40px;
         img {
           width: 100%;
-
         }
       }
     }
