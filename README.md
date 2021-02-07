@@ -3,7 +3,7 @@
 Aplikacja webowa bookShelves. Celem aplikacji jest katalogowanie książek.
 
 # Demo 
-[live preview](githubpages.link)
+[live preview](https://wfrud.github.io/MDB-task/)
 
 
 ## Features
