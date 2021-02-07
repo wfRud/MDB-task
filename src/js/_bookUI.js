@@ -91,7 +91,7 @@ export default class BookUI {
         form.categoryInput.value,
         form.isChecked().value
       );
-
+      console.log(form);
       arr.push(book);
 
       this.createBook(cnt, book);

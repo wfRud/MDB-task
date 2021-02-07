@@ -203,7 +203,6 @@ export default class FormUI {
     const categoriesElems = categoriesCnt.querySelectorAll("option");
 
     categoriesElems.forEach((categoryElem) => {
-      console.log(categoryElem);
       categoryElem.value ? categoryElem.remove() : null;
     });
   }

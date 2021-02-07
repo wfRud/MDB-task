@@ -1,31 +1,36 @@
-import Book from "./Book";
+import List from "./List";
+import ListUI from "./ListUI";
 import Form from "./Form";
 import FormUI from "./FormUI";
 import BookUI from "./_BookUI";
-import Storage from "./_Storage";
 
 export default class App {
   constructor(categories, priorityAmount) {
-    this.categories = new Set(categories);
-    this.priorityAmount = priorityAmount;
-
-    this.updateCategories(this.categories);
-
-    this.formUI = new FormUI(".form_cnt", this.categories, this.priorityAmount);
+    this.list = new List(categories, priorityAmount);
+    this.formUI = new FormUI(
+      ".form_cnt",
+      this.list.categories,
+      this.list.priorityAmount,
+      this.list.books
+    );
     this.form = new Form();
-
-    this.books = Storage.getStorage("Books") ? Storage.getStorage("Books") : [];
-
-    this.tBody = document.querySelector(".booksListCnt");
-
-    this.renderCards(this.tBody, this.books, this.form);
+    this.listUI = new ListUI(
+      ".bookList_section",
+      this.list.getFilters(this.list.filters),
+      this.list.books,
+      this.form
+    );
 
     this.form.addButton.addEventListener("click", (e) => {
       e.preventDefault();
       if (!this.form.editFlag) {
-        new BookUI().addBook(this.tBody, this.form, this.books);
+        new BookUI().addBook(
+          this.listUI.getTbody(),
+          this.form,
+          this.list.books
+        );
       } else {
-        new BookUI().updateBook(this.form, this.books);
+        new BookUI().updateBook(this.form, this.list.books);
       }
     });
 
@@ -36,7 +41,7 @@ export default class App {
         document.querySelectorAll("[data-edit]"),
         true
       );
-      new BookUI().clearEditFlag(this.books, false);
+      new BookUI().clearEditFlag(this.list.books, false);
 
       this.form.addButton.textContent = "Add";
       this.form.addButton.className = "btn btn-success btn-add";
@@ -53,26 +58,13 @@ export default class App {
     this.form.addCategoryButton.addEventListener("click", (e) => {
       e.preventDefault();
 
-      if (this.form.addCategory(this.categories)) {
+      if (this.form.addCategory(this.list.categories)) {
         this.formUI.clearCategories(this.form.categorySelectCnt);
         this.formUI.renderCategories(
-          this.categories,
+          this.list.categories,
           this.form.categorySelectCnt
         );
       }
     });
-  }
-
-  renderCards(cnt, arr, form) {
-    arr.forEach((item) => {
-      new BookUI().renderBooks(cnt, item, arr, form);
-    });
-  }
-
-  updateCategories(categories) {
-    const storageCategories = Storage.getStorage("categories");
-    storageCategories
-      ? storageCategories.forEach((category) => categories.add(category))
-      : null;
   }
 }
