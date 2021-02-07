@@ -33,6 +33,14 @@ export default class List {
     return categories.reduce((prev, next) => prev + (next === search), 0);
   }
 
+  sortList(arr, sortFlag) {
+    if (sortFlag) {
+      return arr.sort((a, b) => a - b);
+    } else {
+      return arr.sort((a, b) => a + b);
+    }
+  }
+
   updateCategories(categories) {
     const storageCategories = Storage.getStorage("categories");
     storageCategories

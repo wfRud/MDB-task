@@ -1,12 +1,13 @@
 import BookUI from "./_BookUI";
 
 export default class ListUI {
-  constructor(cnt, getFiltersFnc, books, countCategories, form) {
+  constructor(cnt, getFiltersFnc, books, countCategories, form, filters) {
     this.getFilters = getFiltersFnc;
     this.books = books;
     this.form = form;
     this.counter = countCategories;
     this.booksLength = this.books.length;
+    this.filters = filters;
 
     this.getRootList = () => _rootList;
     this.getHeader = () => _header;
@@ -27,6 +28,7 @@ export default class ListUI {
     const _filterSelectInput = this.getHeader().querySelectorAll(
       "select[data-role]"
     );
+    this.sortTable(this.filters);
   }
 
   attachToCnt(cnt, root) {
@@ -164,6 +166,7 @@ export default class ListUI {
     elems.forEach((elem) => {
       const th = document.createElement("th");
       th.scope = "col";
+      th.className = elem;
       th.textContent = elem;
 
       tRow.appendChild(th);

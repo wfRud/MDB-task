@@ -113,7 +113,6 @@ export default class Form {
   clearRadioButton() {
     this.priorityCheckBoxes.forEach((item) => {
       item.removeAttribute("checked");
-      console.log(item);
     });
   }
 

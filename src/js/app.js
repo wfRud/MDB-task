@@ -19,7 +19,8 @@ export default class App {
       this.list.getFilters(this.list.filters),
       this.list.books,
       this.list.countCategories,
-      this.form
+      this.form,
+      this.list.filters
     );
 
     this.addBook();

@@ -35,10 +35,10 @@ export default class BookUI {
     priority.textContent = props.priority;
 
     // Added Class
-    title.className = "title";
-    author.className = "author";
-    category.className = "category";
-    priority.className = "priority";
+    title.className = "title-td";
+    author.className = "author-td";
+    category.className = "category-td";
+    priority.className = "priority-td";
 
     // Set src & alt attr for icons
     this.getEditIcon().src = "./assets/edit-regular.svg";
