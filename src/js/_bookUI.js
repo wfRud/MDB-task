@@ -21,20 +21,18 @@ export default class BookUI {
       author = document.createElement("td"),
       category = document.createElement("td"),
       priority = document.createElement("td"),
-      cover = document.createElement("td"),
       actions = document.createElement("td");
 
-    const coverImg = document.createElement("img"),
-      icons_cnt = document.createElement("div"),
+    const icons_cnt = document.createElement("div"),
       editIcon_cnt = document.createElement("span"),
-      deleteIcon_cnt = document.createElement("span");
+      deleteIcon_cnt = document.createElement("span"),
+      categoryAmount = document.createElement("span");
 
     // Set Book content
     title.textContent = props.title;
     author.textContent = props.author;
     category.textContent = props.category;
     priority.textContent = props.priority;
-    //** coverImg.src = props.cover;
 
     // Added Class
     title.className = "title";
@@ -53,6 +51,7 @@ export default class BookUI {
     editIcon_cnt.className = "icon_Cnt";
     deleteIcon_cnt.className = "icon_Cnt";
     icons_cnt.className = "iCons_cnt";
+    categoryAmount.className = "categoryAmount";
 
     // Set bookElement index
     this.getBookElement().setAttribute("data-id", props.id);
@@ -62,8 +61,9 @@ export default class BookUI {
     this.getBookElement().appendChild(author);
     this.getBookElement().appendChild(category);
     this.getBookElement().appendChild(priority);
-    this.getBookElement().appendChild(cover);
     this.getBookElement().appendChild(actions);
+
+    category.appendChild(categoryAmount);
 
     editIcon_cnt.appendChild(this.getEditIcon());
     deleteIcon_cnt.appendChild(this.getDeleteIcon());
@@ -71,7 +71,6 @@ export default class BookUI {
     icons_cnt.appendChild(editIcon_cnt);
     icons_cnt.appendChild(deleteIcon_cnt);
     actions.appendChild(icons_cnt);
-    cover.appendChild(coverImg);
 
     cnt.appendChild(this.getBookElement());
   }
@@ -82,7 +81,7 @@ export default class BookUI {
     this.editBook(arr, form);
   }
 
-  addBook(cnt, form, arr) {
+  addBook(cnt, form, arr, countCategories) {
     if (form.isValid()) {
       const book = new Book(
         arr.length,
@@ -91,12 +90,22 @@ export default class BookUI {
         form.categoryInput.value,
         form.isChecked().value
       );
-      console.log(form);
       arr.push(book);
 
       this.createBook(cnt, book);
-      this.deleteBook(arr);
+      this.deleteBook(arr, countCategories);
       this.editBook(arr, form);
+
+      // update categoryAmount for each book
+      const categoryElements = document.querySelectorAll(".categoryAmount");
+      categoryElements.forEach((item) => {
+        const amount = countCategories(arr, item.parentElement.textContent);
+        item.textContent = `    (${amount})`;
+      });
+
+      // update books amount
+      document.querySelector(".booksAmount").textContent = arr.length;
+
       Storage.setStorage("Books", arr);
 
       form.clearForm();
@@ -168,9 +177,14 @@ export default class BookUI {
     }
   }
 
-  deleteBook(arr) {
+  deleteBook(arr, countCategories) {
     this.getDeleteIcon().addEventListener("click", () => {
+      // update categoryAmount for each book
       arr.splice(this.getBookElementID(), 1);
+      const categoryElements = document.querySelectorAll(".categoryAmount");
+
+      document.querySelector(".booksAmount").textContent = arr.length;
+
       this.getBookElement().remove();
       const elemsCollection = document.querySelectorAll("[data-id]");
 
@@ -178,6 +192,7 @@ export default class BookUI {
       this.resetID(elemsCollection, "data-id", true);
 
       Storage.setStorage("Books", arr);
+      return arr.length;
     });
   }
 

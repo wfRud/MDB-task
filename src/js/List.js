@@ -9,7 +9,7 @@ export default class List {
     this.filters = ["category", "author", "priority"];
 
     this.updateCategories(this.categories);
-    this.countCategories();
+    // console.log(this.countCategories(this.books, "Fantasy"));
   }
 
   getFilters(filters) {
@@ -28,11 +28,9 @@ export default class List {
       : new Error("Enter search Value");
   }
 
-  countCategories() {
-    this.books.reduce((prev, next) => {
-      console.log(prev);
-      console.log(next);
-    });
+  countCategories(arr, search) {
+    const categories = arr.map((book) => book.category);
+    return categories.reduce((prev, next) => prev + (next === search), 0);
   }
 
   updateCategories(categories) {

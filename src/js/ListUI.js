@@ -1,10 +1,12 @@
 import BookUI from "./_BookUI";
 
 export default class ListUI {
-  constructor(cnt, getFiltersFnc, books, form) {
+  constructor(cnt, getFiltersFnc, books, countCategories, form) {
     this.getFilters = getFiltersFnc;
     this.books = books;
     this.form = form;
+    this.counter = countCategories;
+    this.booksLength = this.books.length;
 
     this.getRootList = () => _rootList;
     this.getHeader = () => _header;
@@ -19,14 +21,12 @@ export default class ListUI {
     this.attachToCnt(cnt, this.getHeader());
     this.attachToCnt(cnt, this.getRootList());
 
-    this.renderItems(this.getTbody(), this.books, this.form);
+    this.renderItems(this.getTbody(), this.books, this.form, this.counter);
 
     const _listItems = this.getTbody().querySelectorAll("[data-id]");
     const _filterSelectInput = this.getHeader().querySelectorAll(
       "select[data-role]"
     );
-
-    // console.log(this.getFilterSelectInput());
   }
 
   attachToCnt(cnt, root) {
@@ -38,7 +38,7 @@ export default class ListUI {
     rootList.className = "bookList_content";
 
     rootList.appendChild(
-      this.createTableLabel("bookListTable", this.books.length)
+      this.createTableLabel("bookListTable", this.booksLength)
     );
     rootList.appendChild(this.createTable("bookListTable"));
 
@@ -130,9 +130,15 @@ export default class ListUI {
 
   //   List Content
   createTableLabel(id, booksAmount) {
-    const label = document.createElement("label");
+    const label = document.createElement("label"),
+      span = document.createElement("span");
+
+    span.className = "booksAmount";
+    span.textContent = booksAmount;
+
     label.htmlFor = id;
-    label.textContent = `Books Amount: ${booksAmount}`;
+    label.textContent = `Books Amount: `;
+    label.appendChild(span);
 
     return label;
   }
@@ -143,14 +149,7 @@ export default class ListUI {
     table.id = id;
 
     table.appendChild(
-      this.craeteThead([
-        "Title",
-        "Author",
-        "Category",
-        "Priority",
-        "Cover",
-        "Actions",
-      ])
+      this.craeteThead(["Title", "Author", "Category", "Priority", "Actions"])
     );
 
     table.appendChild(this.createTbody());

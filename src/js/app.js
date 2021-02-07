@@ -18,22 +18,33 @@ export default class App {
       ".bookList_section",
       this.list.getFilters(this.list.filters),
       this.list.books,
+      this.list.countCategories,
       this.form
     );
 
+    this.addBook();
+    this.clearFormBtn();
+    this.swtichCategoryInput();
+    this.addCategoryBtn();
+  }
+
+  addBook() {
     this.form.addButton.addEventListener("click", (e) => {
       e.preventDefault();
       if (!this.form.editFlag) {
         new BookUI().addBook(
           this.listUI.getTbody(),
           this.form,
-          this.list.books
+          this.list.books,
+          this.list.countCategories
         );
       } else {
         new BookUI().updateBook(this.form, this.list.books);
       }
     });
+  }
 
+  clearFormBtn() {
     this.form.clearButton.addEventListener("click", (e) => {
       e.preventDefault();
       this.form.clearForm();
@@ -47,14 +58,18 @@ export default class App {
       this.form.addButton.className = "btn btn-success btn-add";
       delete this.form.editFlag;
     });
+  }
 
+  swtichCategoryInput() {
     this.form.categoryOptionLabel.addEventListener("click", (e) => {
       e.preventDefault();
       this.form.addCategoryInput.classList.toggle("active");
       this.form.categoryInput.classList.toggle("active");
       this.form.addCategoryButton.classList.toggle("active");
     });
+  }
 
+  addCategoryBtn() {
     this.form.addCategoryButton.addEventListener("click", (e) => {
       e.preventDefault();
 
