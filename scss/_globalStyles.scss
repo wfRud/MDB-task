@@ -1,0 +1,64 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: $main-font;
+}
+body {
+  width: 100vw;
+  height: 100vh;
+}
+
+form {
+  label[for="categoryOptionSelect"] {
+    transition: 0.3s;
+    &:hover {
+      cursor: pointer;
+      box-shadow: 0px 7px 3px -4px $bs_blue;
+      outline: 0;
+    }
+    &.focus {
+      outline: 0;
+    }
+  }
+  #addCategory {
+    display: none;
+    &.active {
+      display: block;
+    }
+  }
+
+  #categoryOptionSelect {
+    display: none;
+    &.active {
+      display: block;
+    }
+  }
+
+  .btn.btn-success.btn-add-category {
+    display: none;
+    &.active {
+      display: block;
+    }
+  }
+}
+
+.bookList_section {
+  #bookListTable {
+    img {
+      width: 20%;
+    }
+    .iCons_cnt {
+      display: flex;
+      justify-content: space-around;
+      .icon_Cnt {
+        display: block;
+        width: 40px;
+        height: 40px;
+        img {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
