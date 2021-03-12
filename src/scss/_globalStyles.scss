@@ -44,10 +44,27 @@ form {
 }
 
 .bookList_section {
-  #bookListTable {
+  .bookListContentHeader {
+    .actionBtnsPanel {
+      width: 20%;
+      display: flex;
+      justify-content: space-between;
+      .icon_Cnt {
+        display: block;
+        width: 40px;
+        height: 40px;
+        img {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  #bookList {
     img {
       width: 20%;
     }
+
     .iCons_cnt {
       display: flex;
       justify-content: space-around;

@@ -1,19 +1,29 @@
-import BookUI from "./_BookUI";
+import List from "./List";
+import { createActionBtns, createModal } from "./utils";
 
-export default class ListUI {
-  constructor(cnt, getFiltersFnc, books, countCategories, form, filters) {
-    this.getFilters = getFiltersFnc;
-    this.books = books;
-    this.form = form;
-    this.counter = countCategories;
-    this.booksLength = this.books.length;
-    this.filters = filters;
+export class ListUI {
+  constructor(cnt) {
+    this.subscribers = [];
+    this.list = new List(
+      ["Crime", "Sci-Fi", "Fantasy", "Poetry", "Drama", "Science"],
+      5
+    );
+    this.getFilters = this.list.searchObjects("author");
+    this.tHeads = this.list.tHeadsNames;
+
+    this.state = {
+      listView: "list",
+      booksAmount: this.list.books.length,
+      filtered: [],
+      mode: ["asc", "desc", "default"],
+      variantMode: 0,
+      currentThead: "",
+    };
 
     this.getRootList = () => _rootList;
     this.getHeader = () => _header;
-    this.getTbody = () => _tbody;
-    this.getListItems = () => _listItems;
-    this.getFilterSelectInput = () => _filterSelectInput;
+    this.getTBody = () => _tbody;
+    this.getSelectOptionElement = (id) => document.getElementById(id);
 
     const _rootList = this.createRootList(),
       _header = this.createHeader(this.getFilters),
@@ -21,14 +31,6 @@ export default class ListUI {
 
     this.attachToCnt(cnt, this.getHeader());
     this.attachToCnt(cnt, this.getRootList());
-
-    this.renderItems(this.getTbody(), this.books, this.form, this.counter);
-
-    const _listItems = this.getTbody().querySelectorAll("[data-id]");
-    const _filterSelectInput = this.getHeader().querySelectorAll(
-      "select[data-role]"
-    );
-    this.sortTable(this.filters);
   }
 
   attachToCnt(cnt, root) {
@@ -39,23 +41,22 @@ export default class ListUI {
     const rootList = document.createElement("div");
     rootList.className = "bookList_content";
 
-    rootList.appendChild(
-      this.createTableLabel("bookListTable", this.booksLength)
-    );
-    rootList.appendChild(this.createTable("bookListTable"));
+    rootList.appendChild(this.bookListContentHeader());
+    this.state.listView === "list"
+      ? rootList.appendChild(this.createTable())
+      : rootList.appendChild(this.createGrid());
 
     return rootList;
   }
 
-  //   Header List
-  createHeader(filters) {
+  //* Header List *//
+  createHeader() {
     const header = document.createElement("header");
     header.className = "bookList_header";
 
     header.appendChild(this.createHeaderTitle("Book List"));
-    header.appendChild(
-      this.createFilterPanel("bookListFilters", "Filters", filters)
-    );
+    header.appendChild(this.createFilterPanel("bookListFilters", "Filters"));
+
     return header;
   }
 
@@ -67,35 +68,58 @@ export default class ListUI {
     return h3;
   }
 
-  createFilterPanel(id, labelText, filters) {
+  createFilterPanel(id, labelText) {
     const filtersCnt = document.createElement("div"),
       filtersPanel = document.createElement("div"),
+      filtersBadgesPanel = document.createElement("div"),
       label = document.createElement("label");
 
     label.htmlFor = id;
     label.textContent = labelText;
 
+    filtersCnt.className = "filtersPanel";
     filtersPanel.className =
       "bookList_header-filters_cnt form-group d-flex justify-content-between";
     filtersPanel.id = id;
+    filtersBadgesPanel.className =
+      "bookList_header-filtersBadgesPanel form-group d-flex flex-row";
 
-    filters.forEach((filter) => {
-      const optionElement = this.createOptionFilterInput(
-        `${filter.name}categoryOptionFilter`,
-        filter.filters,
-        `${filter.name}`
-      );
+    const priorityArray = Array.from(
+      Array(this.list.priorityAmount),
+      (x, index) => index + 1
+    );
 
-      filtersPanel.appendChild(optionElement);
-    });
+    const categoryOption = this.createOptionFilterInput(
+      "categoryOptionFilter",
+      "category",
+      this.list.categories,
+      "category"
+    );
+    const authorOption = this.createOptionFilterInput(
+      "authorOptionFilter",
+      "author",
+      this.list.searchObjects("author"),
+      "author"
+    );
+    const priorityOption = this.createOptionFilterInput(
+      "priorityOptionFilter",
+      "priority",
+      priorityArray,
+      "priority"
+    );
+
+    filtersPanel.appendChild(categoryOption);
+    filtersPanel.appendChild(authorOption);
+    filtersPanel.appendChild(priorityOption);
 
     filtersCnt.appendChild(label);
     filtersCnt.appendChild(filtersPanel);
+    filtersCnt.appendChild(filtersBadgesPanel);
 
     return filtersCnt;
   }
 
-  createOptionFilterInput(id, filter, labelText) {
+  createOptionFilterInput(id, name, filter, labelText) {
     const select = document.createElement("select"),
       option = document.createElement("option"),
       label = document.createElement("label"),
@@ -103,12 +127,14 @@ export default class ListUI {
 
     select.id = id;
     select.className = "form-control";
-    select.dataset.role = "data-role";
+    select.dataset.name = name;
+    select.dataset.action = "filter";
     option.textContent = "Choose...";
     option.value = "";
 
     select.appendChild(option);
 
+    this.handleOptionClickedEvent(select);
     this.renderOptionFilter(filter, select);
 
     label.htmlFor = id;
@@ -122,15 +148,85 @@ export default class ListUI {
   }
 
   renderOptionFilter(filter, rootElem) {
-    filter.forEach((filterItems) => {
+    this.clearOptionFilter(rootElem);
+
+    filter.forEach((filterItem) => {
       const option = document.createElement("option");
-      option.value = filterItems;
-      option.textContent = filterItems;
+      option.value = filterItem;
+      option.textContent = filterItem;
+
       rootElem.appendChild(option);
     });
   }
 
-  //   List Content
+  handleOptionClickedEvent(optionElement) {
+    optionElement.addEventListener("change", (e) => {
+      e.target.value
+        ? this.list.addFilter(e.target.dataset.name, e.target.value)
+        : null;
+      this.renderFilterBadges();
+      this.state.filtered = this.list.filterList();
+
+      this.notify(e);
+      [...e.target.children][0].selected = true;
+    });
+  }
+
+  renderFilterBadges() {
+    const filtersPanel = document.querySelector(
+      ".bookList_header-filtersBadgesPanel"
+    );
+
+    this.clearFilterBadgeCnt(filtersPanel);
+    for (let item in this.list.filters) {
+      [...this.list.filters[item]].forEach((filter) =>
+        filtersPanel.appendChild(this.createFilterBadge(filter))
+      );
+    }
+  }
+
+  clearFilterBadgeCnt(filterBadgeCnt) {
+    const filterBadges = filterBadgeCnt.querySelectorAll(".badge");
+    filterBadges ? filterBadges.forEach((badge) => badge.remove()) : null;
+  }
+
+  createFilterBadge(filterItem) {
+    const filterBadge = document.createElement("span");
+    filterBadge.className = "badge badge-primary";
+    filterBadge.textContent = filterItem;
+    filterBadge.dataset.action = "filter";
+
+    filterBadge.addEventListener("click", (e) => {
+      this.list.deleteFilter(e.target.textContent);
+      e.target.remove();
+      this.state.filtered = this.list.filterList();
+
+      this.notify(e);
+    });
+
+    return filterBadge;
+  }
+
+  clearOptionFilter(rootElem) {
+    const optionsFilter = rootElem.querySelectorAll("option");
+
+    optionsFilter.forEach((elem) => (elem.value ? elem.remove() : null));
+  }
+
+  //* List Content *//
+  bookListContentHeader() {
+    const bookListContentHeader = document.createElement("div");
+    bookListContentHeader.classList =
+      "bookListContentHeader form-group d-flex justify-content-between";
+
+    bookListContentHeader.appendChild(
+      this.createTableLabel("bookListTable", this.state.booksAmount)
+    );
+    bookListContentHeader.appendChild(this.createActionBtnsPanel());
+
+    return bookListContentHeader;
+  }
+
   createTableLabel(id, booksAmount) {
     const label = document.createElement("label"),
       span = document.createElement("span");
@@ -145,29 +241,114 @@ export default class ListUI {
     return label;
   }
 
-  createTable(id) {
+  createActionBtnsPanel() {
+    const actionBtnsPanel = document.createElement("div");
+    actionBtnsPanel.className = "actionBtnsPanel";
+
+    const gridIcon = createActionBtns(
+      "./assets/grid.svg",
+      "grid-icon",
+      "icon grid_icon",
+      "icon_Cnt",
+      "grid",
+      this.notify.bind(this)
+    );
+    const listIcon = createActionBtns(
+      "./assets/list.svg",
+      "list-icon",
+      "icon list_icon",
+      "icon_Cnt",
+      "list",
+      this.notify.bind(this)
+    );
+    const exportIcon = createActionBtns(
+      "./assets/export.svg",
+      "export-icon",
+      "icon export_icon",
+      "icon_Cnt",
+      "export",
+      this.notify.bind(this)
+    );
+
+    actionBtnsPanel.appendChild(gridIcon);
+    actionBtnsPanel.appendChild(listIcon);
+    actionBtnsPanel.appendChild(exportIcon);
+
+    return actionBtnsPanel;
+  }
+
+  createTable() {
     const table = document.createElement("table");
     table.className = "table";
-    table.id = id;
+    table.id = "bookList";
 
-    table.appendChild(
-      this.craeteThead(["Title", "Author", "Category", "Priority", "Actions"])
-    );
+    table.appendChild(this.craeteThead());
 
     table.appendChild(this.createTbody());
 
     return table;
   }
 
-  craeteThead(elems) {
+  createGrid() {
+    const grid = document.createElement("div"),
+      bookList_cnt = document.createElement("div");
+
+    bookList_cnt.className = "bookList_Cnt d-flex justify-content-between";
+
+    grid.className = "grid";
+    grid.id = "bookList";
+
+    grid.appendChild(bookList_cnt);
+
+    return grid;
+  }
+
+  resetView() {
+    document.getElementById("bookList").remove();
+  }
+
+  craeteThead() {
     const thead = document.createElement("thead"),
       tRow = document.createElement("tr");
 
-    elems.forEach((elem) => {
+    this.tHeads.forEach((elem) => {
       const th = document.createElement("th");
       th.scope = "col";
-      th.className = elem;
+      th.className = `thead thead-${elem}`;
       th.textContent = elem;
+      th.dataset.action = "sort";
+
+      th.addEventListener("click", (e) => {
+        switch (th.className) {
+          case "thead thead-Author":
+          case "thead thead-Category":
+          case "thead thead-Priority":
+            if (
+              e.target.textContent === this.state.currentThead ||
+              !this.state.currentThead
+            ) {
+              this.state.currentThead = elem;
+
+              this.notify(e);
+
+              this.state.variantMode < 2
+                ? this.state.variantMode++
+                : (this.state.variantMode = 0);
+            } else {
+              this.state.currentThead = elem;
+              this.state.variantMode = 0;
+
+              this.notify(e);
+
+              this.state.variantMode < 2
+                ? this.state.variantMode++
+                : (this.state.variantMode = 0);
+            }
+            break;
+          default:
+            return;
+        }
+      });
 
       tRow.appendChild(th);
     });
@@ -185,15 +366,79 @@ export default class ListUI {
     return tBody;
   }
 
-  renderItems(cnt, arr, form) {
-    arr.forEach((item) => {
-      new BookUI().renderBooks(cnt, item, arr, form);
+  resetId() {
+    this.getTBody()
+      .querySelectorAll("tr")
+      .forEach((item, index) => item.setAttribute("data-id", index));
+  }
+
+  setBooksAmount() {
+    const counter = document.querySelector(".booksAmount");
+    counter.textContent = this.list.hasFilters()
+      ? this.state.filtered.length
+      : this.state.booksAmount;
+  }
+
+  clearItems() {
+    const tBody = document.querySelector(".bookList_Cnt").children;
+
+    [...tBody].forEach((item) => {
+      item.remove();
     });
   }
 
-  clearItems(cnt) {
-    cnt.forEach((item) => {
-      item.remove();
+  // * Register Subscribers *//
+  notify(e) {
+    const action = e.target.dataset.action;
+
+    this.subscribers.forEach((subject) => {
+      switch (action) {
+        case "filter":
+          subject({
+            action: action,
+          });
+          break;
+
+        case "sort":
+          const { mode, variantMode } = this.state;
+          subject({
+            action: action,
+            sortMode: mode[variantMode],
+            tHead: e.target.textContent,
+          });
+          break;
+
+        case "list":
+          this.state.listView = "list";
+          subject({
+            action: action,
+            listView: this.state.listView,
+          });
+
+          break;
+
+        case "grid":
+          this.state.listView = "grid";
+          subject({
+            action: action,
+            listView: this.state.listView,
+          });
+          break;
+
+        case "export":
+          this.state.listView = "list";
+          subject({
+            action: action,
+            listView: this.state.listView,
+          });
+          break;
+        default:
+          return;
+      }
     });
+  }
+
+  registerSubscribers(subscriber) {
+    this.subscribers.push(subscriber);
   }
 }

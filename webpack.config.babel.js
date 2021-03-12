@@ -42,6 +42,13 @@ config.plugins = [
   }),
 ];
 
+// config.externalsType = "script";
+// config.externals = {
+//   jspdf: "https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.min.js",
+//   jspdfautotable:
+//     "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/2.3.5/jspdf.plugin.autotable.min.js",
+// };
+
 config.devServer = {
   contentBase: resolve(__dirname, "dist"),
   port: 3000,

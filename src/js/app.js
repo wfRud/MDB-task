@@ -1,86 +1,131 @@
-import List from "./List";
-import ListUI from "./ListUI";
+import { ListUI } from "./ListUI";
+import { FormUI } from "./FormUI";
+import { Book } from "./Book";
+import { BookUI } from "./BookUI";
+import { createModal, handleExportButtons } from "./utils";
+
 import Form from "./Form";
-import FormUI from "./FormUI";
-import BookUI from "./_BookUI";
+import Storage from "./_Storage";
 
-export default class App {
-  constructor(categories, priorityAmount) {
-    this.list = new List(categories, priorityAmount);
-    this.formUI = new FormUI(
-      ".form_cnt",
-      this.list.categories,
-      this.list.priorityAmount,
-      this.list.books
-    );
-    this.form = new Form();
-    this.listUI = new ListUI(
-      ".bookList_section",
-      this.list.getFilters(this.list.filters),
-      this.list.books,
-      this.list.countCategories,
-      this.form,
-      this.list.filters
-    );
+const listUI = new ListUI(".bookList_section");
+const formUI = new FormUI(
+  ".form_cnt",
+  listUI.list.categories,
+  listUI.list.priorityAmount
+);
+const bookUI = new BookUI();
 
-    this.addBook();
-    this.clearFormBtn();
-    this.swtichCategoryInput();
-    this.addCategoryBtn();
-  }
+formUI.registerSubcribers((publisher) => {
+  const { action } = publisher;
 
-  addBook() {
-    this.form.addButton.addEventListener("click", (e) => {
-      e.preventDefault();
-      if (!this.form.editFlag) {
-        new BookUI().addBook(
-          this.listUI.getTbody(),
-          this.form,
-          this.list.books,
-          this.list.countCategories
-        );
-      } else {
-        new BookUI().updateBook(this.form, this.list.books);
-      }
-    });
-  }
+  switch (action) {
+    case "add":
+      const listLength = listUI.list.books.length;
+      const { title, author, category, priority } = publisher.data;
+      const book = new Book(listLength, title, author, category, priority);
 
-  clearFormBtn() {
-    this.form.clearButton.addEventListener("click", (e) => {
-      e.preventDefault();
-      this.form.clearForm();
-      new BookUI().clearEditFlag(
-        document.querySelectorAll("[data-edit]"),
-        true
+      listUI.list.addBook(book);
+      bookUI.createBook(".bookList_Cnt", listUI.state.listView, book);
+      Storage.setStorage("Books", listUI.list.books);
+      Form.clearForm();
+      Form.clearStorage(Form.getInputsForm());
+      listUI.state.booksAmount = listUI.list.books.length;
+      listUI.setBooksAmount();
+      break;
+
+    case "edit":
+      const { data, id, editedElement } = publisher;
+      listUI.list.updateBook(id, data);
+      bookUI.updateBookElement(editedElement, data);
+      Storage.setStorage("Books", listUI.list.books);
+      Form.setDefaultForm();
+      Form.clearForm();
+      Form.clearStorage(Form.getInputsForm());
+      break;
+
+    case "addCategory":
+      Form.addCategory(listUI.list.categories);
+      formUI.renderCategories(listUI.list.categories, Form.getCategoryInput());
+      listUI.renderOptionFilter(
+        listUI.list.categories,
+        listUI.getSelectOptionElement("categoryOptionFilter")
       );
-      new BookUI().clearEditFlag(this.list.books, false);
+      break;
 
-      this.form.addButton.textContent = "Add";
-      this.form.addButton.className = "btn btn-success btn-add";
-      delete this.form.editFlag;
-    });
+    default:
+      throw Error("Action not recognized");
   }
+});
 
-  swtichCategoryInput() {
-    this.form.categoryOptionLabel.addEventListener("click", (e) => {
-      e.preventDefault();
-      this.form.addCategoryInput.classList.toggle("active");
-      this.form.categoryInput.classList.toggle("active");
-      this.form.addCategoryButton.classList.toggle("active");
-    });
+bookUI.registerSubscribers((publisher) => {
+  const { id, action, element } = publisher;
+  const currentBook = listUI.list.getBook(id);
+
+  if (action === "edit") {
+    formUI.state = {
+      editedBookID: id,
+      editedElement: element,
+    };
+
+    Form.setEditForm(currentBook);
+  } else {
+    listUI.list.deleteBook(currentBook);
+    listUI.list.resetId();
+    element.remove();
+    listUI.resetId();
+    listUI.state = {
+      booksAmount: listUI.list.books.length,
+    };
+    listUI.setBooksAmount();
+    Storage.setStorage("Books", listUI.list.books);
   }
+});
 
-  addCategoryBtn() {
-    this.form.addCategoryButton.addEventListener("click", (e) => {
-      e.preventDefault();
+listUI.registerSubscribers((publisher) => {
+  const { action } = publisher;
+  const { filtered, listView } = listUI.state;
+  const booksList = listUI.list.hasFilters() ? filtered : listUI.list.books;
 
-      if (this.form.addCategory(this.list.categories)) {
-        this.formUI.clearCategories(this.form.categorySelectCnt);
-        this.formUI.renderCategories(
-          this.list.categories,
-          this.form.categorySelectCnt
-        );
-      }
-    });
+  switch (action) {
+    case "filter":
+      listUI.clearItems();
+      bookUI.renderBooks(filtered, listView);
+      listUI.setBooksAmount();
+
+      break;
+    case "sort":
+      const { sortMode, tHead } = publisher;
+      const sorted = listUI.list.hasFilters()
+        ? listUI.list.sortBooks(filtered, tHead, sortMode)
+        : listUI.list.sortBooks(listUI.list.books, tHead, sortMode);
+
+      listUI.clearItems();
+
+      bookUI.renderBooks(sorted, listView);
+      break;
+    case "list":
+      listUI.resetView();
+      listUI.getRootList().appendChild(listUI.createTable());
+
+      bookUI.renderBooks(booksList, listView);
+      break;
+    case "grid":
+      listUI.resetView();
+      listUI.getRootList().appendChild(listUI.createGrid());
+
+      bookUI.renderBooks(booksList, listView);
+      break;
+
+    case "export":
+      listUI.resetView();
+      listUI.getRootList().appendChild(listUI.createTable());
+
+      bookUI.renderBooks(listUI.list.books, listView);
+
+      createModal();
+      handleExportButtons();
+
+    default:
+      return;
   }
-}
+});

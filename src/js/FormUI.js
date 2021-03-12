@@ -1,13 +1,21 @@
-export default class FormUI {
+import Storage from "./_Storage";
+import Form from "./Form";
+
+export class FormUI {
   constructor(cnt, categories, priorityAmount) {
     const root = this.createRoot(),
       _categories = categories,
       _priorityAmount = priorityAmount;
+
+    this.subscribers = [];
+
     this.createForm(root, _categories, _priorityAmount);
     this.attachToCnt(cnt, root);
 
-    // this.getCategories = () => _categories;
-    // this.getPriorityAmount = () => _priorityAmount;
+    Form.getInputsStorage(Form.getInputsForm());
+    Form.setInputsStorage(Form.getInputsForm());
+
+    this.swtichCategoryInput();
   }
 
   attachToCnt(cnt, root) {
@@ -20,7 +28,7 @@ export default class FormUI {
   }
 
   createForm(root, categories, priorityAmount) {
-    //   Title Input
+    // Title Input
     root.appendChild(
       this.createInput(
         "text",
@@ -65,10 +73,22 @@ export default class FormUI {
     );
 
     root.appendChild(
-      this.createBtn("button", "btn btn-danger btn-clear", "Clear")
+      this.createBtn(
+        "button",
+        "clear-btn",
+        "btn btn-danger btn-clear",
+        "Clear",
+        "clear"
+      )
     );
     root.appendChild(
-      this.createBtn("button", "btn btn-success btn-add", "Add")
+      this.createBtn(
+        "button",
+        "add-btn",
+        "btn btn-success btn-add",
+        "Add",
+        "add"
+      )
     );
   }
 
@@ -107,7 +127,7 @@ export default class FormUI {
     select.id = id;
     select.className = "form-control active";
     select.name = name;
-    select.dataset.role = "data-role";
+    select.dataset.role = "form-input";
     option.textContent = "Choose...";
     option.value = "";
 
@@ -117,7 +137,7 @@ export default class FormUI {
     addCategoryInput.name = "addCategory";
     addCategoryInput.placeholder = "Add category";
     addCategoryInput.required = true;
-    addCategoryInput.dataset.role = "data-role";
+    addCategoryInput.dataset.role = "form-input";
 
     select.appendChild(option);
 
@@ -131,8 +151,10 @@ export default class FormUI {
     formGroup.appendChild(
       this.createBtn(
         "button",
+        "addCategory-btn",
         "btn btn-success btn-add-category",
-        "add category"
+        "add category",
+        "addCategory"
       )
     );
     formGroup.appendChild(addCategoryInput);
@@ -181,16 +203,58 @@ export default class FormUI {
     return formGroup;
   }
 
-  createBtn(type, className, txtContent) {
+  createBtn(type, id, className, txtContent, action) {
     const btn = document.createElement("button");
     btn.type = type;
+    btn.id = id;
     btn.className = className;
     btn.textContent = txtContent;
+    btn.dataset.action = action;
+
+    btn.addEventListener("click", (e) => {
+      const action = e.target.dataset.action;
+      if (action === "clear") {
+        Form.clearForm();
+        Form.setDefaultForm();
+        Form.clearStorage(Form.getInputsForm());
+      } else {
+        this.subscribers.forEach((subject) => {
+          switch (action) {
+            case "edit":
+              Form.getData()
+                ? subject({
+                    action: e.target.dataset.action,
+                    id: this.state.editedBookID,
+                    data: Form.getData(),
+                    editedElement: this.state.editedElement,
+                  })
+                : null;
+              break;
+            case "add":
+              Form.getData()
+                ? subject({
+                    action: e.target.dataset.action,
+                    data: Form.getData(),
+                  })
+                : null;
+              break;
+            case "addCategory":
+              subject({
+                action: e.target.dataset.action,
+                value: Form.getAddCategoryInput().value,
+              });
+            default:
+              return;
+          }
+        });
+      }
+    });
 
     return btn;
   }
 
   renderCategories(categories, rootElem) {
+    this.clearCategories(rootElem);
     categories.forEach((category) => {
       const option = document.createElement("option");
       option.value = category;
@@ -205,5 +269,19 @@ export default class FormUI {
     categoriesElems.forEach((categoryElem) => {
       categoryElem.value ? categoryElem.remove() : null;
     });
+  }
+
+  swtichCategoryInput() {
+    Form.getCategoryOptionLabel().addEventListener("click", (e) => {
+      e.preventDefault();
+
+      Form.getAddCategoryInput().classList.toggle("active");
+      Form.getCategoryInput().classList.toggle("active");
+      Form.getAddCategoryBtn().classList.toggle("active");
+    });
+  }
+
+  registerSubcribers(subscriber) {
+    this.subscribers.push(subscriber);
   }
 }
